@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Booking Test</title>
+</head>
+<body>
+  <h1>Event Booking Platform</h1>
+
+  <!-- Registration -->
+  <h2>Register User</h2>
+  <input id="regName" placeholder="Name">
+  <input id="regEmail" placeholder="Email">
+  <input id="regPass" type="password" placeholder="Password">
+  <button onclick="registerUser()">Register</button>
+  <pre id="regResult"></pre>
+
+  <!-- Login -->
+  <h2>Login User</h2>
+  <input id="loginEmail" placeholder="Email">
+  <input id="loginPass" type="password" placeholder="Password">
+  <button onclick="loginUser()">Login</button>
+  <pre id="loginResult"></pre>
+
+  <!-- Create Event -->
+  <h2>Create Event</h2>
+  <input id="eventTitle" placeholder="Title">
+  <input id="eventDesc" placeholder="Description">
+  <input id="eventDate" type="datetime-local">
+  <button onclick="createEvent()">Create Event</button>
+  <pre id="eventResult"></pre>
+
+  <!-- Fetch Events -->
+  <h2>All Events</h2>
+  <button onclick="getEvents()">Get Events</button>
+  <pre id="allEvents"></pre>
+
+  <script>
+    let token = "";
+
+    async function registerUser() {
+      const res = await fetch("http://localhost:5002/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: document.getElementById("regName").value,
+          email: document.getElementById("regEmail").value,
+          password: document.getElementById("regPass").value
+        })
+      });
+      const data = await res.json();
+      document.getElementById("regResult").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function loginUser() {
+      const res = await fetch("http://localhost:5002/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: document.getElementById("loginEmail").value,
+          password: document.getElementById("loginPass").value
+        })
+      });
+      const data = await res.json();
+      token = data.token; // save token for event creation
+      document.getElementById("loginResult").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function createEvent() {
+      const res = await fetch("http://localhost:5002/api/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          title: document.getElementById("eventTitle").value,
+          description: document.getElementById("eventDesc").value,
+          date: document.getElementById("eventDate").value
+        })
+      });
+      const data = await res.json();
+      document.getElementById("eventResult").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getEvents() {
+      const res = await fetch("http://localhost:5002/api/events");
+      const data = await res.json();
+      document.getElementById("allEvents").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
